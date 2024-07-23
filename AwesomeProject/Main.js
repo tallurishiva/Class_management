@@ -28,7 +28,7 @@ export default function Main({navigation}) {
           else if(route.name=== 'Stats'){
              return <FontAwesome5 name="chart-bar" size={size} color={color} />
           }
-          else if(route.name=== 'Doubts'){
+          else if(route.name=== 'Assignments'){
             return <Entypo name="hand" size={24} color={color}/>
          }
          else if(route.name=== 'Mark'){
@@ -45,7 +45,7 @@ export default function Main({navigation}) {
       })}
       >
        <Tab.Screen name="Home" component={CompressedCalendar} />
-       <Tab.Screen name="Doubts" component={Doughts} />
+       <Tab.Screen name="Assignments" component={Doughts} />
        <Tab.Screen name="Mark" component={MarkAttendence} />
        <Tab.Screen name="Stats" component={AttendanceStats}/>
        <Tab.Screen name="Notifications" component={Notifications} />

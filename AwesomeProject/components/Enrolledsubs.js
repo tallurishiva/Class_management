@@ -1,31 +1,76 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '../configfirebase'; // Import your firebase configuration
 
 const EnrolledSubjects = ({ subjects }) => {
-    //TODO completle the student and teach reg info
+  const [detailedSubjects, setDetailedSubjects] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchSubjectDetails = async () => {
+      try {
+        const subjectDetails = [];
+        for (const subject of subjects) {
+          const docRef = doc(db, 'RegisteredSubjets', subject.subID);
+          const docSnap = await getDoc(docRef);
+          
+          if (docSnap.exists()) {
+            const data = docSnap.data();
+            subjectDetails.push({
+              ...data,
+              id: docSnap.id,
+              startDate: data.startDate ? data.startDate.toDate().toLocaleDateString() : 'N/A',
+              endDate: data.endDate ? data.endDate.toDate().toLocaleDateString() : 'N/A'
+            });
+          } else {
+            console.log(`No such document with ID: ${subject.subID}`);
+          }
+        }
+        setDetailedSubjects(subjectDetails);
+      } catch (e) {
+        console.log('Error fetching subject details:', e.message);
+        setError(e.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchSubjectDetails();
+  }, [subjects]);
+
+  if (loading) {
+    return <Text>Loading...</Text>;
+  }
+
+  if (error) {
+    return <Text>Error: {error}</Text>;
+  }
+
   return (
     <View style={styles.container}>
-      {subjects.map((subject, index) => (
+      {detailedSubjects.map((subject, index) => (
         <View key={index} style={styles.subjectContainer}>
           <View style={styles.fieldContainer}>
             <Text style={styles.label}>Subject Name:</Text>
-            <Text style={styles.value}>{subject.subID}</Text>
+            <Text style={styles.value}>{subject.subject || 'N/A'}</Text>
           </View>
           <View style={styles.fieldContainer}>
             <Text style={styles.label}>Enrollment:</Text>
-            <Text style={styles.value}>{subject.enrollment}</Text>
+            <Text style={styles.value}>{subjects[0].enrollment ? 'Enrolled' : 'Not Enrolled'}</Text>
           </View>
           <View style={styles.fieldContainer}>
             <Text style={styles.label}>Batch:</Text>
-            <Text style={styles.value}>{subject.batch}</Text>
+            <Text style={styles.value}>{subject.batch || 'N/A'}</Text>
           </View>
           <View style={styles.fieldContainer}>
             <Text style={styles.label}>Semester:</Text>
-            <Text style={styles.value}>{subject.semester}</Text>
+            <Text style={styles.value}>{subject.semester || 'N/A'}</Text>
           </View>
           <View style={styles.fieldContainer}>
             <Text style={styles.label}>Section:</Text>
-            <Text style={styles.value}>{subject.section}</Text>
+            <Text style={styles.value}>{subject.section || 'N/A'}</Text>
           </View>
           <View style={styles.fieldContainer}>
             <Text style={styles.label}>Start Date:</Text>
@@ -47,15 +92,11 @@ const styles = StyleSheet.create({
     padding: 20,
     backgroundColor: '#fff',
   },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 20,
-    color: 'black',
-  },
   subjectContainer: {
     marginBottom: 20,
-    padding: 15
+    padding: 15,
+    backgroundColor: 'lightblue',
+    borderRadius: 10,
   },
   fieldContainer: {
     flexDirection: 'row',
